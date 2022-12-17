@@ -1,0 +1,19 @@
+int n=100;
+real eta=2000; 
+func f=sin(x);
+
+macro grad(u) (dx(u)+dy(u)) //def gradient
+
+border a(t=0,10){x=t;y=0;label=1;};
+border b(t=0,0.5){x=10;y=t;label=2;};
+border c(t=0,10){x=10-t;y=0.5;label=3;};
+border d(t=0,0.5){x=0;y=0.5-t;label=4;};
+mesh Th=buildmesh(a(n)+b(n)+c(n)+d(n));  
+ 
+fespace Vh(Th,P1dc);
+ Vh u,v;
+
+problem poisson(u,v,solver=UMFPACK) = int2d(Th)(dx(u)*dx(v)+dy(u)*dy(v))+ intalledges(Th)(( jump(v)*mean(grad(u)) -  jump(u)*mean(grad(v)) + eta*jump(u)*jump(v) ) / nTonEdge) - int2d(Th)(f*v);
+poisson;
+
+plot(u,cmm="Discontinue Galerkin",wait=1,fill=1);
